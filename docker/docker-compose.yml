@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: openwebui
+    volumes:
+      - /path/to/openwebui:/app/backend/data
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - 8000:8080
+    environment:
+      - OLLAMA_BASE_URLS=http://host.docker.internal:11434
+      - ENV=dev
+      - WEBUI_AUTH=True
+      - WEBUI_NAME=Name
+      - WEBUI_SECRET_KEY=Secret
+    restart: unless-stopped
+    depends_on:
+      - ollama
+      - pipelines
+
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    volumes:
+      - /path/to/ollama:/root/.ollama
+    ports:
+      - 11434:11434
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  pipelines:
+    image: ghcr.io/open-webui/pipelines:main
+    container_name: pipelines
+    volumes:
+      - /path/to/pipelines:/app/pipelines
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - 9099:9099
+    restart: unless-stopped
+    environment:
+      - PIPELINES_API_KEY=Secret

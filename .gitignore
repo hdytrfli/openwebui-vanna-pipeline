@@ -1,0 +1,11 @@
+.DS_Store
+__pycache__
+
+.venv
+.env
+.env.local
+
+*.sqlite
+*.sqlite-journal
+
+other
